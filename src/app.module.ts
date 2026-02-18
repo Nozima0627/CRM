@@ -7,9 +7,16 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
-  imports: [
+  imports: 
+  [
+      ServeStaticModule.forRoot({
+        rootPath: join(process.cwd(),'src', 'uploads'),
+        serveRoot:'/files'
+      }),
     ConfigModule.forRoot({
         isGlobal: true
     }),

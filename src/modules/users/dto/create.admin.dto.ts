@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
 import {
   IsEmail,
-  IsEnum,
   IsMobilePhone,
   IsNotEmpty,
   IsString,
