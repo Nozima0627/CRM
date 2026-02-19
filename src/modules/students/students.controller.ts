@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -86,5 +86,10 @@ export class StudentsController {
     ){
         console.log(file)
         return this.studentService.createStudent(payload, file?.filename)
+    }
+
+    @Put()
+    updateStudent(){
+        
     }
 }

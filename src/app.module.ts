@@ -9,6 +9,7 @@ import { RoomsModule } from './modules/rooms/rooms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { LessonsModule } from './modules/lessons/lessons.module';
 
 @Module({
   imports: 
@@ -26,7 +27,8 @@ import { join } from 'path';
     StudentsModule,
     CoursesModule,
     GroupsModule,
-    RoomsModule
+    RoomsModule,
+    LessonsModule
   ]
 })
 export class AppModule {}
