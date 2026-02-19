@@ -1,29 +1,28 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { RoomsService } from './rooms.service';
+import { StudentGroupService } from './student-group.service';
+import { CreateStudentGroupDto } from './dto/create.student.group.dto';
 import { Roles } from 'src/common/decorators/role';
 import { Role } from '@prisma/client';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { CreateRoomDto } from './dto/create.room.dto';
 
 
 @ApiBearerAuth()
-@Controller('rooms')
-export class RoomsController {
-    constructor(private readonly roomService: RoomsService){}
-
-
+@Controller('student-group')
+export class StudentGroupController {
+    constructor(private readonly studentGroupService: StudentGroupService){}
 
     @ApiOperation({
         summary:`${Role.SUPERADMIN}, ${Role.ADMIN}`
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
-    @Get('all')
-    getAllRooms(){
-        return this.roomService.getAllRooms()
+    @Get('@all')
+    getAllStudentGroup(){
+        return this.studentGroupService.getAllStudentGroup()
     }
+
 
 
     @ApiOperation({
@@ -32,7 +31,7 @@ export class RoomsController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Post()
-    createRoom(@Body() payload: CreateRoomDto){
-        return this.roomService.createRoom(payload)
+    createStudentGroup(@Body() payload: CreateStudentGroupDto){
+        return this.studentGroupService.createStudentGroup(payload)
     }
 }

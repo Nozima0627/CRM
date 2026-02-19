@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -21,9 +21,21 @@ export class StudentsController {
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
-    @Get()
+    @Get('all')
     getAllStudents(){
         return this.studentService.getAllStudents()
+    }
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Get('single/:id')
+    getOneStudent(
+        @Param('id', ParseIntPipe) id: number 
+    ){
+        return this.studentService.getOneStudent(id)
     }
 
 
@@ -70,9 +82,9 @@ export class StudentsController {
     @Post('student')
     createStudent(
         @Body() payload : CreateStudentDto,
-        @UploadedFile() file : Express.Multer.File
+        @UploadedFile() file? : Express.Multer.File
     ){
         console.log(file)
-        return this.studentService.createStudent(payload, file.filename)
+        return this.studentService.createStudent(payload, file?.filename)
     }
 }

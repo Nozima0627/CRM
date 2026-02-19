@@ -1,15 +1,16 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/database/prisma.service';
 import { CreateTeacherDto } from './dto/create.dto';
 import * as bcyrpt from 'bcrypt';
 import { Status } from '@prisma/client';
+import { IsEmpty } from 'class-validator';
 
 @Injectable()
 export class TeachersService {
     constructor(private prisma : PrismaService){}
     
         async getAllTeachers(){
-            const students = await this.prisma.teacher.findMany({
+            const teachers = await this.prisma.teacher.findMany({
                 where:{
                     status: Status.active
                 },
@@ -25,10 +26,73 @@ export class TeachersService {
             })
             return {
                 success: true,
-                data:students
+                data:teachers
+            }
+        }
+
+        async getAllInactiveTeachers(){
+            const teachers = await this.prisma.teacher.findMany({
+                where:{
+                    OR:[
+                        {status: Status.inactive},
+                        {status: Status.freeze}
+                    ]
+                },
+                select:{
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    phone: true,
+                    photo: true,
+                    email: true,
+                    address: true
+                }
+            })
+            return {
+                success: true,
+                data:teachers
+            }
+        }
+
+        async getAllgroups(id:number){
+            const groups = await this.prisma.group.findMany({
+                where:{teacher_id: id}
+            })
+
+            if(!groups) throw new NotFoundException("This teacher has not any groups yet")
+
+            return {
+                success: true,
+                data: groups
             }
         }
     
+
+        async getOneTeacher(id: number){
+        const teacher = await this.prisma.teacher.findUnique({
+            where:{
+                id,
+                status:Status.active
+            },
+            select:{
+                id: true,
+                first_name: true,
+                last_name: true,
+                phone: true,
+                photo: true,
+                email: true,
+                address: true
+            }
+        })
+        return {
+            success: true,
+            data: teacher
+        }
+    }
+
+
+
+
         async createTeacher(payload: CreateTeacherDto, filename? : string ){
     
             const existTeacher = await this.prisma.teacher.findFirst({

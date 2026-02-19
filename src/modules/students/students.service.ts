@@ -3,10 +3,14 @@ import { PrismaService } from 'src/core/database/prisma.service';
 import { CreateStudentDto } from './dto/create.dto';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@prisma/client';
+import { EmailService } from 'src/common/email/email.service';
 
 @Injectable()
 export class StudentsService {
-    constructor(private prisma : PrismaService){}
+    constructor(
+        private prisma : PrismaService,
+        private emaileService: EmailService
+    ){}
 
     async getAllStudents(){
         const students = await this.prisma.student.findMany({
@@ -30,6 +34,31 @@ export class StudentsService {
         }
     }
 
+
+    async getOneStudent(id: number){
+        const student = await this.prisma.student.findUnique({
+            where:{
+                id,
+                status:Status.active
+            },
+            select:{
+                id: true,
+                first_name: true,
+                last_name: true,
+                phone: true,
+                photo: true,
+                email: true,
+                address: true,
+                birth_date: true
+            }
+        })
+        return {
+            success: true,
+            data: student
+        }
+    }
+
+
     async createStudent(payload: CreateStudentDto, filename? : string ){
 
         const existStudent = await this.prisma.student.findFirst({
@@ -42,7 +71,7 @@ export class StudentsService {
         })
 
         if(existStudent) {
-            throw new ConflictException()
+            throw new ConflictException('Student is already exist')
         }
 
         const hashPass = await bcrypt.hash(payload.password, 10)
@@ -58,6 +87,10 @@ export class StudentsService {
                 address: payload.address
             }
         })
+
+        await this.emaileService.sendEmail(payload.email, payload.phone, payload.password)
+
+
         return {
             success: true,
             message: "Student created"

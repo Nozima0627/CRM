@@ -20,13 +20,13 @@ import { join } from 'path';
     ConfigModule.forRoot({
         isGlobal: true
     }),
+    AuthModule,
     UsersModule,
-    StudentsModule,
     TeachersModule,
+    StudentsModule,
     CoursesModule,
     GroupsModule,
-    RoomsModule,
-    AuthModule
+    RoomsModule
   ]
 })
 export class AppModule {}

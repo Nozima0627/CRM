@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TeachersService } from './teachers.service';
 import { CreateTeacherDto } from './dto/create.dto';
 import { diskStorage } from 'multer';
@@ -21,9 +21,40 @@ export class TeachersController {
         })
         @UseGuards(AuthGuard, RoleGuard)
         @Roles(Role.SUPERADMIN, Role.ADMIN)
-        @Get()
+        @Get('all')
         getAllTeachers(){
             return this.teacherService.getAllTeachers()
+        }
+
+        @ApiOperation({
+            summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`
+        })
+        @UseGuards(AuthGuard, RoleGuard)
+        @Roles(Role.SUPERADMIN, Role.ADMIN)
+        @Get('all/archived')
+        getAllInactiveTeachers(){
+            return this.teacherService.getAllInactiveTeachers()
+        }
+
+
+        @Get('all/groups/:id')
+        getAllgroups(
+            @Param('id', ParseIntPipe) id: number
+        ){
+            return this.teacherService.getAllgroups(id)
+        }
+
+
+        @ApiOperation({
+            summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`
+        })
+        @UseGuards(AuthGuard, RoleGuard)
+        @Roles(Role.SUPERADMIN, Role.ADMIN)
+        @Get('single/:id')
+        getOneTeachers(
+            @Param('id', ParseIntPipe) id: number
+        ){
+            return this.teacherService.getOneTeacher(id)
         }
     
     
@@ -57,6 +88,8 @@ export class TeachersController {
                 }
             })
         }))
+
+
         @Post('teacher')
         createTeacher(
             @Body() payload : CreateTeacherDto,
