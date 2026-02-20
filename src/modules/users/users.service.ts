@@ -1,8 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create.admin.dto';
 import { PrismaService } from 'src/core/database/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Role, Status } from '@prisma/client';
+import { UpdateAdminDto } from './dto/update.admin.dto';
 
 @Injectable()
 export class UsersService {
@@ -56,4 +57,55 @@ export class UsersService {
             message: "admin is created"
         }
     }
+
+    async updateAdmin(id: number, payload: UpdateAdminDto) {
+        const user = await this.prisma.user.findFirst({
+          where: { id }
+        });
+    
+        if (!user) {
+          throw new NotFoundException('user not found by this id');
+        }
+    
+    
+        await this.prisma.user.update({
+          where: { id },
+          data: {
+            first_name: payload.first_name ?? user.first_name,
+            last_name: payload.last_name ?? user.last_name,
+            phone: payload.phone ?? user.phone,
+            email: payload.email ?? user.email,
+            password: user.password,
+            address: payload.address ?? user.address,
+          }
+        })
+    
+        return {
+            success: true,
+            message: "Admin info is updated"
+        }
+      }
+    
+      async deleteAdmin(id: number){
+        const user = await this.prisma.user.findFirst({
+            where: {id}
+        })
+    
+        if(!user){
+            throw new NotFoundException("user not found with this ID")
+        }
+    
+        await this.prisma.user.update({
+            where:{ id},
+            data:{
+                status: Status.inactive
+            }
+        })
+    
+        return {
+            success: true,
+            message: "Admin is deleted"
+        }
+      }
+    
 }

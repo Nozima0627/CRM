@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { CreateAdminDto } from './dto/create.admin.dto';
@@ -33,5 +33,32 @@ export class UsersController {
     @Post('admin')
     creadeAdmin(@Body() payload: CreateAdminDto){
         return this.userService.createAdmin(payload);
+    }
+
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}`
+    })
+    @Roles(Role.SUPERADMIN)
+    @UseGuards(AuthGuard, RoleGuard)
+    @Patch('update/admin/:id')
+    updateAdmin(
+        @Body() payload: any,
+        @Param('id', ParseIntPipe) id: number
+    ){
+        return this.userService.updateAdmin(id, payload)
+    }
+
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}`
+    })
+    @Roles(Role.SUPERADMIN)
+    @UseGuards(AuthGuard, RoleGuard)
+    @Delete('delete/admin/:id')
+    deleteAdmin(
+        @Param('id', ParseIntPipe) id: number
+    ){
+        return this.userService.deleteAdmin(id)
     }
 }

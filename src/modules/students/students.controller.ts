@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -8,6 +8,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagg
 import { CreateStudentDto } from './dto/create.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { UpdateStudentDto } from './dto/update.student.dto';
 
 
 @ApiBearerAuth()
@@ -25,6 +26,16 @@ export class StudentsController {
     getAllStudents(){
         return this.studentService.getAllStudents()
     }
+
+    @ApiOperation({
+            summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`
+        })
+        @UseGuards(AuthGuard, RoleGuard)
+        @Roles(Role.SUPERADMIN, Role.ADMIN)
+        @Get('all/archived')
+        getAllInactiveStudents(){
+            return this.studentService.getAllInactiveStudents()
+        }
 
     @ApiOperation({
         summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`
@@ -88,8 +99,33 @@ export class StudentsController {
         return this.studentService.createStudent(payload, file?.filename)
     }
 
-    @Put()
-    updateStudent(){
-        
+
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`,
+        description: "Bu endpointga admin va superadmin huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Patch(":id")
+    updateStudent(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: UpdateStudentDto,
+        @UploadedFile() photo?: Express.Multer.File,
+    ){
+        return this.studentService.updateStudent(id, payload, photo)
+    }
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}, ${Role.ADMIN}`,
+        description: "Bu endpointga admin va superadmin huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Delete(":id")
+    deleteStudent(
+        @Param('id', ParseIntPipe) id: number
+    ){
+        return this.studentService.deleteStudent(id)
     }
 }
