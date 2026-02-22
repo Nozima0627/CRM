@@ -1,11 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsMobilePhone,
-  IsNotEmpty,
   IsOptional,
   IsString,
-  IsStrongPassword,
 } from 'class-validator';
 
 export class UpdateAdminDto {
@@ -20,6 +18,7 @@ export class UpdateAdminDto {
   last_name: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
   @IsMobilePhone('uz-UZ')
   phone: string;
 

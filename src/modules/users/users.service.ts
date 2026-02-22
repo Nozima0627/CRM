@@ -32,6 +32,26 @@ export class UsersService {
         }
     }
 
+    async getAllInactiveAdmins() {
+    const admins = await this.prisma.user.findMany({
+      where: {
+        OR: [{ status: Status.inactive }, { status: Status.freeze }],
+      },
+      select: {
+        id:true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        phone: true,
+        role: true
+      },
+    });
+    return {
+      success: true,
+      data: admins,
+    };
+  }
+
     async createAdmin(payload: CreateAdminDto){
         const existAdmin = await this.prisma.user.findFirst({
             where: {
@@ -75,8 +95,7 @@ export class UsersService {
             last_name: payload.last_name ?? user.last_name,
             phone: payload.phone ?? user.phone,
             email: payload.email ?? user.email,
-            password: user.password,
-            address: payload.address ?? user.address,
+            password: user.password
           }
         })
     

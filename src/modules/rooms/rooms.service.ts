@@ -1,7 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/database/prisma.service';
 import { CreateRoomDto } from './dto/create.room.dto';
 import { Status } from '@prisma/client';
+import { UpdateRoomDto } from './dto/update.room.dto';
 
 @Injectable()
 export class RoomsService {
@@ -10,6 +11,17 @@ export class RoomsService {
     async getAllRooms(){
         const rooms = await this.prisma.room.findMany({
             where:{status:Status.active}
+        })
+
+        return{
+            success:true,
+            data:rooms
+        }
+    }
+
+    async getAllArchivedRooms(){
+        const rooms = await this.prisma.room.findMany({
+            where:{status:Status.inactive}
         })
 
         return{
@@ -33,6 +45,50 @@ export class RoomsService {
         return {
             success: true,
             message:"Room is created"
+        }
+    }
+
+    async updateRoom(payload: UpdateRoomDto, id: number){
+        const room = await this.prisma.room.findFirst({
+            where: { id }
+        })
+
+        if(!room) {
+            throw new NotFoundException("Room is not found with this ID")
+        }
+
+        await this.prisma.room.update({
+            where:{ id },
+            data:{
+                name: payload.name ?? room.name
+            }
+        })
+
+        return {
+            success: true,
+            message: "Room is updated"
+        }
+    }
+
+    async deleteRoom(id: number){
+        const room = await this.prisma.room.findFirst({
+            where: { id }
+        })
+
+        if(!room) {
+            throw new NotFoundException("Room is not found with this ID")
+        }
+
+        await this.prisma.room.update({
+            where: { id },
+            data:{
+                status: Status.inactive
+            }
+        })
+
+        return {
+            success: true,
+            message: "Room is deleted"
         }
     }
 

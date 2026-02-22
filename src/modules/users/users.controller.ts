@@ -7,6 +7,7 @@ import { Roles } from 'src/common/decorators/role';
 import { Role } from '@prisma/client';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UpdateAdminDto } from './dto/update.admin.dto';
 
 
 @Controller('users')
@@ -22,6 +23,18 @@ export class UsersController {
     @Get('admin/all')
     getAllAdmins(){
         return this.userService.getAllAdmins()
+    }
+
+
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN)
+    @Get('archived/all')
+    getAllInactiveAdmins(){
+        return this.userService.getAllInactiveAdmins()
     }
 
     @ApiBearerAuth()
@@ -43,7 +56,7 @@ export class UsersController {
     @UseGuards(AuthGuard, RoleGuard)
     @Patch('update/admin/:id')
     updateAdmin(
-        @Body() payload: any,
+        @Body() payload: UpdateAdminDto,
         @Param('id', ParseIntPipe) id: number
     ){
         return this.userService.updateAdmin(id, payload)
