@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { HomeworkService } from './homework.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -24,6 +24,19 @@ export class HomeworkController {
     @Get('all')
     getAllHomework(){
         return this.homeworkService.getAllHomework()
+    }
+
+    @ApiOperation({
+        summary: `${Role.STUDENT}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.STUDENT)
+    @Get('own/:lessonId')
+    getOwnHomework(
+        @Param('lessonId', ParseIntPipe) lessonId : number,
+        @Req() req: Request
+    ){
+        return this.homeworkService.getOwnHomework(lessonId, req['user'])
     }
 
 

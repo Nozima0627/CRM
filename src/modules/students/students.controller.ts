@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Query, Req, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -9,6 +9,7 @@ import { CreateStudentDto } from './dto/create.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UpdateStudentDto } from './dto/update.student.dto';
+import { paginationDto } from './dto/pagination.dto';
 
 
 @ApiBearerAuth()
@@ -23,8 +24,10 @@ export class StudentsController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Get('all')
-    getAllStudents(){
-        return this.studentService.getAllStudents()
+    getAllStudents(
+        @Query() page: paginationDto
+    ){
+        return this.studentService.getAllStudents(page)
     }
 
     @ApiOperation({
@@ -48,6 +51,19 @@ export class StudentsController {
     ){
         return this.studentService.getOneStudent(id)
     }
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}, ${Role.STUDENT}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.STUDENT)
+    @Get('own/groups')
+    getMyGroups(
+        @Req() req : Request
+    ){
+        return this.studentService.getMyGroups(req['user'])
+    }
+
 
 
     @ApiOperation({
@@ -95,7 +111,6 @@ export class StudentsController {
         @Body() payload : CreateStudentDto,
         @UploadedFile() file? : Express.Multer.File
     ){
-        console.log(file)
         return this.studentService.createStudent(payload, file?.filename)
     }
 

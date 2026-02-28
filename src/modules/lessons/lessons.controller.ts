@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dto/create.lesson.dto';
 import { Roles } from 'src/common/decorators/role';
@@ -22,6 +22,19 @@ export class LessonsController {
     @Get('all')
     getAllLessons(){
         return this.lessonService.getAllLessons()
+    }
+
+    @ApiOperation({
+        summary: `${Role.STUDENT}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.STUDENT, Role.SUPERADMIN)
+    @Get('my/group/:groupdId')
+    getMyGroupLessons(
+        @Param('groupId', ParseIntPipe) groupdId : number,
+        @Req() req: Request
+    ){
+        return this.lessonService.getMyGroupLessons(groupdId, req['user'])
     }
 
     @ApiOperation({

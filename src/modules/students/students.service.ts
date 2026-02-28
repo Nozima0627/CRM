@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '@prisma/client';
 import { EmailService } from 'src/common/email/email.service';
 import { UpdateStudentDto } from './dto/update.student.dto';
+import { paginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class StudentsService {
@@ -17,7 +18,8 @@ export class StudentsService {
     private emaileService: EmailService,
   ) {}
 
-  async getAllStudents() {
+  async getAllStudents(pagination: paginationDto) {
+    const {page, limit} = pagination
     const students = await this.prisma.student.findMany({
       where: {
         status: Status.active,
@@ -32,6 +34,8 @@ export class StudentsService {
         address: true,
         birth_date: true,
       },
+      skip: (limit? +limit : 10) * (page? +page-1 : 0),
+      take:limit? +limit : 10
     });
     return {
       success: true,
@@ -85,6 +89,25 @@ export class StudentsService {
       success: true,
       data: student,
     };
+  }
+
+  async getMyGroups(currentUser : {id: number}){
+    const myGroups = await this.prisma.studentGroup.findMany({
+        where:{student_id: currentUser.id},
+        select:{
+            groups:{
+                select:{
+                    id: true,
+                    name: true
+                }
+            }
+        }
+    })
+
+    return {
+        success: true,
+        data: myGroups.map(el => el.groups)
+    }
   }
 
   async createStudent(payload: CreateStudentDto, filename?: string) {
