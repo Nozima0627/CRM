@@ -5,17 +5,17 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1')
+  app.setGlobalPrefix('lms')
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true
   }))
   const config = new DocumentBuilder()
-  .setTitle('CRM')
+  .setTitle('LMS')
   .addBearerAuth()
   .build()
 
   const documentFactory = () => SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, documentFactory, {swaggerOptions: {
+  SwaggerModule.setup('lms', app, documentFactory, {swaggerOptions: {
     persistAuthorization: true,
   }})
   await app.listen(process.env.PORT ?? 3000);
